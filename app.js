@@ -6,6 +6,9 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const crypto = require('crypto');
+const path = require('path');
+const multer = require('multer');
 
 const JWT_SECRET = "secret key";
 
@@ -19,6 +22,23 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'Public')));
+
+// Multer Storage Configuration
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './Public/images/uploads');
+    },
+    filename: function (req, file, cb) {
+        crypto.randomBytes(12, function (err, bytes) {
+            if (err) return cb(err);
+            const fn = bytes.toString("hex") + path.extname(file.originalname);
+            cb(null, fn);
+        });
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // Authentication Middleware
 function isLoggedIn(req, res, next) {
@@ -38,6 +58,15 @@ function isLoggedIn(req, res, next) {
 // Routes
 app.get('/', (req, res) => {
     res.render('index');
+});
+
+app.get('/test', (req, res) => {
+    res.render('test');
+});
+
+app.post('/upload', upload.single('image'), (req, res) => {
+    console.log(req.file);
+    res.redirect('/test');
 });
 
 app.get('/login', (req, res) => {
@@ -104,12 +133,9 @@ app.get('/profile', isLoggedIn, async (req, res) => {
 app.get('/like/:id', isLoggedIn, async (req, res) => {
     let post = await postModel.findOne({ _id: req.params.id });
 
-    // Check if the current user already liked the post
     if (post.likes.indexOf(req.user.userid) === -1) {
-        // If not liked yet, add user ID to likes array
         post.likes.push(req.user.userid);
     } else {
-        // If already liked, remove user ID (unlike)
         post.likes.splice(post.likes.indexOf(req.user.userid), 1);
     }
 
@@ -123,11 +149,11 @@ app.get('/edit/:id', isLoggedIn, async (req, res) => {
         return res.redirect('/profile');
     }
 
-    res.render("edit", {post});
+    res.render("edit", { post });
 });
 
 app.post('/update/:id', isLoggedIn, async (req, res) => {
-    let post = await postModel.findOneAndUpdate(
+    await postModel.findOneAndUpdate(
         { _id: req.params.id },
         { content: req.body.content }
     );
