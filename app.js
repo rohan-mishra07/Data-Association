@@ -225,6 +225,33 @@ app.get('/edit/:id', isLoggedIn, async (req, res, next) => {
     }
 });
 
+app.get('/delete/:id', isLoggedIn, async (req, res, next) => {
+    try {
+        let post = await postModel.findOne({ _id: req.params.id });
+        if (!post) {
+            return res.redirect('/profile');
+        }
+
+        // Authenticate ownership
+        if (post.user.toString() !== req.user.userid) {
+            return res.redirect('/profile');
+        }
+
+        // Disassociate post from user document using $pull
+        await userModel.updateOne(
+            { _id: req.user.userid },
+            { $pull: { posts: req.params.id } }
+        );
+
+        // Delete post document
+        await postModel.deleteOne({ _id: req.params.id });
+
+        res.redirect('/profile');
+    } catch (err) {
+        next(err);
+    }
+});
+
 app.post('/update/:id', isLoggedIn, async (req, res, next) => {
     try {
         await postModel.findOneAndUpdate(
