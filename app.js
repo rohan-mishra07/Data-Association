@@ -95,20 +95,23 @@ app.get('/profile/upload', isLoggedIn, (req, res, next) => {
     }
 });
 
-// 4. Multer & Ephemeral Disk Guardrails
+// 4. Multer & In-Memory Base64 Storage
 app.post('/upload', isLoggedIn, (req, res, next) => {
     upload.single("image")(req, res, async (err) => {
         if (err) {
             console.error("Multer upload error:", err);
-            return res.status(500).send("Upload error: " + (err.message || "Storage error"));
+            return res.status(400).send("Upload error: " + (err.message || "File upload failed"));
         }
         try {
             let user = await userModel.findOne({ email: req.user.email });
             if (!user) return res.status(404).send("User not found");
+
             if (req.file) {
-                user.profilepic = req.file.filename;
+                const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+                user.profilepic = base64Image;
                 await user.save();
             }
+
             res.redirect("/profile");
         } catch (dbErr) {
             next(dbErr);

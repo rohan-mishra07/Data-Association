@@ -15,7 +15,7 @@
         <!-- Clickable Profile Picture Link -->
         <a href="/profile/upload" title="Change Profile Picture" class="block h-12 w-12 rounded-md overflow-hidden border border-zinc-700 hover:border-blue-500 hover:opacity-80 transition cursor-pointer">
             <img class="h-full w-full object-cover" 
-                 src="<%= user.profilepic ? '/images/uploads/' + user.profilepic : 'https://api.dicebear.com/7.x/identicon/svg?seed=' + user.username %>" 
+                 src="<%= (user.profilepic && user.profilepic !== 'default.png') ? user.profilepic : 'https://api.dicebear.com/7.x/identicon/svg?seed=' + user.username %>" 
                  alt="Profile Picture"
                  onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/identicon/svg?seed=<%= user.username %>';">
         </a>
