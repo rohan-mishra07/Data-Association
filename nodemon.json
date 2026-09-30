@@ -1,0 +1,11 @@
+{
+  "ext": "js,json,ejs",
+  "ignore": [
+    "public/*",
+    "*.webp",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "node_modules/*"
+  ]
+}

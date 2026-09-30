@@ -10,8 +10,12 @@
     <div class="w-full flex justify-end">
         <a href="/logout" class="bg-red-500 hover:bg-red-600 px-3 py-2 text-sm rounded-md mb-5 inline-block">Logout</a>
     </div>
-    
-    <div class="flex items-start gap-3">
+
+    <div class="flex items-center gap-3">
+        <!-- Clickable Profile Picture Link -->
+        <a href="/profile/upload" title="Change Profile Picture" class="block h-12 w-12 rounded-md overflow-hidden border border-zinc-700 hover:border-blue-500 hover:opacity-80 transition cursor-pointer">
+            <img class="h-full w-full object-cover" src="/images/uploads/<%= user.profilepic %>" alt="Profile Picture">
+        </a>
         <h3 class="text-3xl"><span class="font-light">Hello</span>, <%= user.name %> 👋</h3>
     </div>
     
@@ -38,7 +42,7 @@
                         <small class="mt-1 inline-block"><%= post.likes ? post.likes.length : 0 %></small>
                         <div class="btns flex gap-5 mt-3 mb-3 text-sm">
                             <a class="text-blue-500" href="/like/<%= post._id %>">
-                                <%= post.likes.indexOf(user._id) ? "Like" : "Unlike" %>
+                                <%= post.likes.indexOf(user._id) === -1 ? "Like" : "Unlike" %>
                             </a>
                             <a class="text-zinc-400 hover:text-zinc-200" href="/edit/<%= post._id %>">Edit</a>
                         </div>
